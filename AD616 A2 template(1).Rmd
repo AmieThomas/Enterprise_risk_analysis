@@ -1,0 +1,232 @@
+---
+title: "Assignment 2"
+author: "Amie Thomas"
+date: "2024-10-2"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE,message=FALSE}
+#include any libraries you plan to use for this assignment here
+library(tidyverse)
+```
+
+## Question 1
+*(3 pts) Answer the following two questions:*
+
+### Part a
+*(1 pt) According to the central limit theorem, the sum of n independent identically distributed random variables will start to resemble a normal distribution as n grows large. The mean of the resulting distribution will be n times the mean of the summands, and the variance n times the variance of the summands. Over 10,000 trials, take the sum of 250 uniform random variables (with min=0 and max=1). Note: the variance of the uniform distribution with min 0 and max 1 is 1/12.*
+
+#### i
+*(0.3 pts) Without using simulation, analytically determine the expectation and standard deviation of the sum of 250 Uniform(0,1) random variables.*
+```{r 1-a-i}
+
+```
+
+#### ii
+*(0.4 pts) Create a data frame or matrix, with one row for each trial and one column for each summand. Use this to create a vector with 10,000 elements where each element is the sum of one row.*
+```{r 1-a-ii}
+trials <- 10000
+summands <- 250 
+
+matrix <- matrix(runif(trials*summands, min = 0, max = 1),
+                 nrow = trials,
+                 ncol = summands)
+
+vector <- rowSums(matrix)
+
+```
+
+#### iii
+*(0.1 pts) Calculate the mean and standard deviation of the vector from (ii). Compare these to you results from (i)*
+```{r 1-a-iii}
+mean <- mean(vector)
+std <- sd(vector)
+```
+
+#### iv
+
+*(0.2 pts) Display a histogram of the vector from (ii). Superimpose on this a density plot of a the normal distribution with the parameters you calculated in (i). Hint: use the stat_function function*
+```{r 1-a-iv}
+ggplot(vector, aes(vector)+
+       geom_histogram())
+```
+
+### Part b
+*(1 pt) According to probability theory, if $\{X_1,X_2,...,X_n\}$ are independent and uniform distributed random variables with min=0 and max=1, then the *kth lowest *will follow a beta distribution with parameters shape1=k, shape2=n+1-k. Demonstrate this property using Monte Carlo simulation. Simulate 10,000 trials. For each trial, generate 15 uniform random variables and select the* fourth highest.
+
+#### i
+
+*(0.3 pts) Write a function that finds the fourth highest element of a vector*
+```{r 1-b-i}
+
+```
+
+#### ii
+*(0.1 pts) Create a data frame or matrix with one row for each trial and one column for each random variable*
+```{r 1-b-ii}
+
+```
+
+#### iii
+*(0.3 pts) Apply the function from (i) to the rows of the data frame or matrix from (ii). The result should be a vector with the fourth highest element of each row of the data frame or matrix.*
+```{r 1-b-iii}
+
+```
+
+#### iv
+*(0.2 pts) Generate a histogram of the vector from (iii). Superimpose on this a density plot of the beta distribution with the appropriate parameters.*
+```{r 1-b-iv}
+
+```
+
+#### v
+*(0.1 pts) The expectation and variance of the beta distribution are $\frac{\alpha}{\alpha+\beta}$ and $\frac{\alpha\beta}{(\alpha+\beta)^2(\alpha+\beta+1)}$. Calculate these and compare them to the mean and variance of the vector from (iii)*
+```{r 1-b-v}
+
+```
+
+
+## Question 2
+*(4 pts) Assume you represent a worldwide distributor of classic cars. Create a Monte Carlo simulation with 10,000 trials to demonstrate the property that, if the amount of time it takes before your next customer makes a purchase can be modeled using an exponential distribution with a rate of 15 per day, then the number of times customers will make purchases in a day will follow a Poisson distribution with $\lambda=15$. Follow the process below to demonstrate this result and answer the questions below.*
+
+#### a
+*(0.1 pts) Create a matrix with one row for each trial, and a sufficient number of columns, where each element is generated using the exponential distribution with the appropriate parameter. In your simulation, the number in the 20th row and the 5th column represents, in the 20th trial, the amount of time that elapses between the 4th and 5th purchase.*
+```{r 2-a}
+
+```
+
+#### b
+*(0.5 pts) Create a second matrix with the same dimensions as the first, where each element is the cumulative sum of the row up to that point. In your simulation, the number in the 20th row and 5th column of this matrix represents, in the 20th trial, the amount of time that elapses from the beginning of the day until the 5th purchase.*
+```{r 2-b}
+
+```
+
+#### c
+*(0.5 pts) Create a third matrix with the same dimensions as the second, where each element is TRUE  if the number in the corresponding position in the second matrix is less than one and FALSE otherwise. In your simulation, the Boolean in the 20th row and 5th column represents whether, in the 20th trial, the 5th purchase occurred before a day had elapsed.*
+```{r 2-c}
+
+```
+
+#### d
+*(0.4 pts) Create a vector that counts the number of TRUEs in the first matrix. In your simulation, each element of this vector represents the number of cars sold in one day in the corresponding trial. If the maximum element of this vector is equal to the number of columns in part (a), your results are right-censored. Go back to step (a) and increase the number of columns in your initial matrix. Hint: in R, you can perform arithmetic on Booleans. TRUE is treated as 1 and FALSE is treated as 0.*
+```{r 2-d}
+
+```
+
+#### e
+*(0.3 pts) Display a histogram of the vector from (d). Superimpose on this a plot of the pmf of the Poisson distribution with the appropriate parameters.*
+```{r 2-e}
+
+```
+
+#### f
+*(0.2 pts) The expectation and variance of the Poisson distribution are both equal to $\lambda$. Compare this to the mean and variance of the vector from (d).*
+```{r 2-f}
+
+```
+
+#### g
+*(0.5 pts) Use your simulation to approximate the probability that your organization will sell 20 or more cars on a given day.*
+
+```{r 2-g}
+
+```
+
+
+#### h
+*(0.5 pts) Use the Poisson distribution to calculate the exact probability that your organization will sell 20 or more cars on a given day.*
+
+```{r 2-h}
+
+```
+
+
+## Question 3
+*(4 pts) A life insurance company is pricing a new policy to sell to a group of 45-year-old male non-smokers. They determine that the probability that a member of this group will die X years from the day they purchase the policy can be modeled with a Weibull distribution with shape parameter 4.6 and scale parameter 38, measured in years. The term of the policy is 20 years. At the end of every month, policyholders (PH) are expected to pay a premium of $120. If a PH in good standing dies during the term of the policy, his beneficiaries receive a benefit of $1,000,000 at the end of that month. Every month there is a 0.3% chance that the policy holder will let the policy lapse (i.e. he will permanently stop paying premiums and forfeit his right to the benefit). The insurance company calculates cost of funds using a rate of 6%, compounding monthly.*
+*Hint: The formula for the present value of n payments of size A at the end of each period with a per period interest rate of r is given by* $PV=A*\frac{1-(1+r)^{-n}}{r}$
+
+### Part a
+*(3 pts) Create a Monte Carlo simulation with 100,000 trials of the above scenario to calculate the net present value of cash flows between the company and one policyholder.*
+
+#### i
+*(0.4 pts) Create a data frame with one row for each trial, one column for time until death (measured in months) and another for number of months before the PH would let the policy lapse. Note: you should be able to choose a distribution for the lapse column from among those we discussed in class.*
+```{r 3-a-i}
+
+```
+
+#### ii
+*(1.0 pts) Mutate the data frame from (i). Create new columns to calculate for each trial:*  
+
+- *Whether or not the insurance company owes a benefit;*   
+- *For how many months does the PH pay premiums;*  
+- *The NPV of the payments by the PH;*  
+- *The NPV of the benefit from the insurance company (or 0 if they owe no benefit);*  
+- *The difference between the two NPVs. This is the net NPV for the trial.*  
+```{r 3-a-ii}
+
+```
+
+#### iii
+*(0.4 pts) Create a histogram describing the net NPV of the company. How would you characterize the distribution?*
+```{r 3-a-iii}
+
+```
+
+#### iv
+*(0.3 pts) According to your simulation, what are the mean and standard deviation of the net NPV? On average, is the company making a profit?*
+```{r 3-a-iv}
+
+```
+
+#### v
+*(0.3 pts) Provide a 95% confidence interval for the mean of the net NPV. Interpret the result.*
+```{r 3-a-v}
+
+```
+
+
+#### vi
+*(0.3 pts) How many iterations would be necessary to provide a 99% confidence interval with a half width of $200?*
+```{r 3-a-vi}
+
+```
+
+#### vii
+*(0.3 pts) The company can be 90% certain their net NPV will be at least x. Solve for x. The company can be 99% certain their net NPV will be at least y. Solve for y.*
+```{r 3-a-vii}
+
+```
+
+### Part b
+*(1 pt) Now assume the insurance company underwrites a pool of 1,000 policyholders. Create a Monte Carlo simulation with 1,000 trials to calculate the net present value of cash flows between the company and their pool of policyholders. Answer questions (iii)-(vii) above under this new assumption.*
+
+#### i
+*(0.2 pts) Write a function that generates a data frame like parts (i) and (ii) above with 1000 rows, then use replicate to create a list of 1000 such data frames. Make sure you set simplify=FALSE in replicate.*
+```{r 3-b-i}
+
+```
+
+#### ii
+*(0.3 pts) Write a function that calculates the sum of the net NPV column of a data frame, and apply it to the list of data frames in (i).*
+```{r 3-b-ii}
+
+```
+
+#### iii
+*(0.5 pts) Repeat parts (iii)-(vii) from (a) using the net NPVS from the pool calculated in (ii) from (b)*
+```{r 3-b-iii}
+
+#iii
+
+#iv
+
+#v
+
+#vi
+
+#vii
+
+```
+
