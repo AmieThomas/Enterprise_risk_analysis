@@ -3,6 +3,7 @@ title: "Assignment 2"
 author: "Amie Thomas"
 date: "2024-10-2"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
 ---
@@ -21,7 +22,10 @@ library(tidyverse)
 #### i
 *(0.3 pts) Without using simulation, analytically determine the expectation and standard deviation of the sum of 250 Uniform(0,1) random variables.*
 ```{r 1-a-i}
+# 0+1/2 = 0.5  250 * 0.5 = 125
+#The Expectation = 125
 
+#The standard deviation = 4.57
 ```
 
 #### ii
@@ -49,8 +53,16 @@ std <- sd(vector)
 
 *(0.2 pts) Display a histogram of the vector from (ii). Superimpose on this a density plot of a the normal distribution with the parameters you calculated in (i). Hint: use the stat_function function*
 ```{r 1-a-iv}
-ggplot(vector, aes(vector)+
-       geom_histogram())
+ggplot(data.frame(vector), aes(x = vector)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "lightblue", color = "black", alpha = 0.7) +
+  stat_function(fun = dnorm, 
+                args = list(mean = mean, sd = std), 
+                color = "red", size = 1) +
+  labs(title = "Histogram of Sums with Normal Density Plot",
+       x = "Sum of Uniform(0,1) Random Variables",
+       y = "Density") +
+  theme_minimal()
+
 ```
 
 ### Part b
@@ -61,29 +73,84 @@ ggplot(vector, aes(vector)+
 *(0.3 pts) Write a function that finds the fourth highest element of a vector*
 ```{r 1-b-i}
 
+trial_num <- 10000
+uniform_rv <- 15
+k <- 4
+
+fourth_highest <- numeric(trial_num) 
+
+set.seed(856)
+for (i in 1:trial_num){
+  samples <- runif(uniform_rv, min = 0, max = 1)
+  sort_samples <- sort(samples, decreasing = TRUE)
+  fourth_highest[i] <- sort_samples[k]
+
+}
+
+fhv_mean <- mean(fourth_highest)
+fhv_sd <- sd(fourth_highest)
+
 ```
 
 #### ii
 *(0.1 pts) Create a data frame or matrix with one row for each trial and one column for each random variable*
 ```{r 1-b-ii}
-
+matrix <- matrix(nrow = trial_num, ncol = uniform_rv)
+#should I be getting 0's in my matrix? I think something is off
 ```
 
 #### iii
 *(0.3 pts) Apply the function from (i) to the rows of the data frame or matrix from (ii). The result should be a vector with the fourth highest element of each row of the data frame or matrix.*
 ```{r 1-b-iii}
+kth_highest <- function(row, k) {
+  sort_row <- sort(row, decreasing = TRUE)
+  return(sort_row[k])
+}
 
+
+fourth_highest <- apply(matrix, 1, kth_highest, k)
+
+mean(fourth_highest)
 ```
 
 #### iv
 *(0.2 pts) Generate a histogram of the vector from (iii). Superimpose on this a density plot of the beta distribution with the appropriate parameters.*
 ```{r 1-b-iv}
+trial_num <- 10000
+uniform_rv <- 15
+k <- 4
+
+set.seed(856)
+fourth_highest <- numeric(trial_num)
+for (i in 1:trial_num) {
+  samples <- runif(uniform_rv, min = 0, max = 1)
+  sort_samples <- sort(samples, decreasing = TRUE)
+  fourth_highest[i] <- sort_samples[k]
+}
+
+shape1 <- k
+shape2 <- uniform_rv + 1 - k
+
+hist(fourth_highest, breaks = 30, probability = TRUE,
+     main = "Histogram of 4th Highest Values with Beta Density",
+     xlab = "4th Highest Values", col = "orange", border = "black")
+
+
+curve(dbeta(x, shape1, shape2), add = TRUE, col = "red", lwd = 2)
 
 ```
 
 #### v
 *(0.1 pts) The expectation and variance of the beta distribution are $\frac{\alpha}{\alpha+\beta}$ and $\frac{\alpha\beta}{(\alpha+\beta)^2(\alpha+\beta+1)}$. Calculate these and compare them to the mean and variance of the vector from (iii)*
 ```{r 1-b-v}
+a <- 4
+b <- 12
+
+beta_expectation <- a / (a + b)
+beta_variance <- (a * b) / ((a + b)^2 * (a + b + 1))
+
+fhv_mean <- mean(fourth_highest)
+fhv_variance <- var(fourth_highest)
 
 ```
 
@@ -95,43 +162,74 @@ ggplot(vector, aes(vector)+
 *(0.1 pts) Create a matrix with one row for each trial, and a sufficient number of columns, where each element is generated using the exponential distribution with the appropriate parameter. In your simulation, the number in the 20th row and the 5th column represents, in the 20th trial, the amount of time that elapses between the 4th and 5th purchase.*
 ```{r 2-a}
 
+num_trials <- 10000  
+num_purchases <- 20  
+rate <- 15           
+
+time_between_purchases <- matrix(rexp(num_trials * (num_purchases - 1), rate), 
+                                  nrow = num_trials, 
+                                  ncol = num_purchases - 1)
 ```
 
 #### b
 *(0.5 pts) Create a second matrix with the same dimensions as the first, where each element is the cumulative sum of the row up to that point. In your simulation, the number in the 20th row and 5th column of this matrix represents, in the 20th trial, the amount of time that elapses from the beginning of the day until the 5th purchase.*
 ```{r 2-b}
-
+cumulative_time <- apply(time_between_purchases, 1, cumsum)
 ```
 
 #### c
 *(0.5 pts) Create a third matrix with the same dimensions as the second, where each element is TRUE  if the number in the corresponding position in the second matrix is less than one and FALSE otherwise. In your simulation, the Boolean in the 20th row and 5th column represents whether, in the 20th trial, the 5th purchase occurred before a day had elapsed.*
 ```{r 2-c}
 
+purchase_before_one_day <- cumulative_time < 1
+
 ```
 
 #### d
 *(0.4 pts) Create a vector that counts the number of TRUEs in the first matrix. In your simulation, each element of this vector represents the number of cars sold in one day in the corresponding trial. If the maximum element of this vector is equal to the number of columns in part (a), your results are right-censored. Go back to step (a) and increase the number of columns in your initial matrix. Hint: in R, you can perform arithmetic on Booleans. TRUE is treated as 1 and FALSE is treated as 0.*
 ```{r 2-d}
+cars_sold <- rowSums(purchase_before_one_day)
 
+max_cars_sold <- max(cars_sold)
+num_columns <- ncol(time_between_purchases)
 ```
 
 #### e
 *(0.3 pts) Display a histogram of the vector from (d). Superimpose on this a plot of the pmf of the Poisson distribution with the appropriate parameters.*
 ```{r 2-e}
+lambda <- 15  
 
+ggplot(data.frame(cars_sold), aes(x = cars_sold)) +
+  geom_histogram(aes(y = ..count..), bins = max(cars_sold) + 1, 
+                 fill = "pink", color = "black", alpha = 0.7) +
+  stat_function(fun = dpois, args = list(lambda = lambda), 
+                xlim = c(0, max(cars_sold)), 
+                color = "red", size = 1) +
+  scale_x_continuous(breaks = 0:max(cars_sold)) +  
+  labs(title = "Histogram of Cars Sold with Poisson PMF",
+       x = "Number of Cars Sold",
+       y = "Count") +
+  theme_minimal()
+
+#had issues. Ask prof
 ```
 
 #### f
 *(0.2 pts) The expectation and variance of the Poisson distribution are both equal to $\lambda$. Compare this to the mean and variance of the vector from (d).*
 ```{r 2-f}
-
+mean_cars_sold <- mean(cars_sold)
+var_cars_sold <- var(cars_sold)
 ```
 
 #### g
 *(0.5 pts) Use your simulation to approximate the probability that your organization will sell 20 or more cars on a given day.*
 
 ```{r 2-g}
+num_trials <- length(cars_sold)  
+count_20_or_more <- sum(cars_sold >= 20)  
 
+
+probability_20_or_more <- count_20_or_more / num_trials
 ```
 
 
@@ -139,7 +237,11 @@ ggplot(vector, aes(vector)+
 *(0.5 pts) Use the Poisson distribution to calculate the exact probability that your organization will sell 20 or more cars on a given day.*
 
 ```{r 2-h}
+lambda <- 15
 
+probability_less_than_20 <- ppois(19, lambda)
+
+probability_20_or_more_exact <- 1 - probability_less_than_20
 ```
 
 
@@ -153,7 +255,19 @@ ggplot(vector, aes(vector)+
 #### i
 *(0.4 pts) Create a data frame with one row for each trial, one column for time until death (measured in months) and another for number of months before the PH would let the policy lapse. Note: you should be able to choose a distribution for the lapse column from among those we discussed in class.*
 ```{r 3-a-i}
+num_trials <- 100000
+shape_parameter <- 4.6
+scale_parameter <- 38
 
+monthly_lapse_rate <- 0.003
+scale_parameter_months <- scale_parameter * 12
+
+
+set.seed(856)
+time_until_death <- rweibull(num_trials, shape = shape_parameter, scale = scale_parameter_months)
+lapse_time <- rexp(num_trials, rate = 1 / (1 / (monthly_lapse_rate * 1)))
+
+results <- data.frame(time_until_death = time_until_death, lapse_time_months = lapse_time)
 ```
 
 #### ii
@@ -166,12 +280,33 @@ ggplot(vector, aes(vector)+
 - *The difference between the two NPVs. This is the net NPV for the trial.*  
 ```{r 3-a-ii}
 
+monthly_premium <- 120
+benefit_amount <- 1000000
+interest_rate <- 0.06 / 12  
+policy_term_months <- 20 * 12  
+
+results <- results %>%
+  mutate(
+    owes_benefit = time_until_death <= policy_term_months,
+    months_of_payments = pmin(time_until_death, policy_term_months),
+    npv_payments = monthly_premium * (1 - (1 + interest_rate)^(-months_of_payments)) / interest_rate,
+    npv_benefit = ifelse(owes_benefit, benefit_amount * (1 + interest_rate)^(-time_until_death), 0),
+    net_npv = npv_benefit - npv_payments
+  )
+
 ```
 
 #### iii
 *(0.4 pts) Create a histogram describing the net NPV of the company. How would you characterize the distribution?*
 ```{r 3-a-iii}
+ggplot(results, aes(x = net_npv)) +
+  geom_histogram(bins = 50, fill = "purple", color = "black", alpha = 0.7) +
+  labs(title = "Histogram of Net NPV for the Insurance Company",
+       x = "Net NPV",
+       y = "Frequency") +
+  theme_minimal()
 
+#what is going ooonnn with this 
 ```
 
 #### iv
